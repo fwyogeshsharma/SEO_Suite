@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEO Suite</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--line:#262b36;--tx:#e8eaf0;--mut:#8b93a7;--acc:#5b8cff;--ok:#34c38f;--warn:#f1b44c;--bad:#f46a6a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,Segoe UI,sans-serif}
+header{padding:14px 24px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+h1{font-size:18px;margin:0 12px 0 0}input,textarea,select{background:#0c0e12;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:7px 10px;font:inherit}
+textarea{width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;min-height:64px}
+input.url{flex:1;min-width:240px}button,.btn{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:7px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button.sec,.btn.sec{background:#222735;color:var(--tx)}button.sm{padding:3px 9px;font-size:12px}button:disabled{opacity:.5;cursor:wait}
+nav{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--line);overflow:auto;white-space:nowrap}
+nav button{background:none;color:var(--mut);border-radius:0;padding:11px 11px;border-bottom:2px solid transparent}
+nav button.on{color:var(--tx);border-color:var(--acc)}main{padding:20px 24px;max-width:1500px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.big{font-size:38px;font-weight:700}.mut{color:var(--mut)}.pill{padding:2px 8px;border-radius:99px;font-size:12px}
+.critical{background:#f46a6a22;color:var(--bad)}.warning{background:#f1b44c22;color:var(--warn)}.info{background:#5b8cff22;color:var(--acc)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{position:sticky;top:0;background:var(--card);cursor:pointer;white-space:nowrap;font-weight:600}th:hover{color:var(--acc)}
+.tw{overflow:auto;max-height:640px;border:1px solid var(--line);border-radius:8px}.tw td{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.tw td a{color:var(--acc);text-decoration:none}
+details{border-top:1px solid var(--line);padding:8px 0}summary{cursor:pointer}.urls{font-size:12px;color:var(--mut);word-break:break-all;margin:6px 0 0 16px}
+pre{background:#0c0e12;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;white-space:pre-wrap}
+.bar{height:8px;background:#222735;border-radius:4px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--acc)}
+.hidden{display:none}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{background:#222735;color:var(--mut);border-radius:99px;padding:4px 12px;font-size:13px;cursor:pointer;border:0}.chip.on{background:var(--acc);color:#fff}
+#settings{padding:14px 24px;border-bottom:1px solid var(--line);background:#12151b}
+#settings .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#settings label{display:block;margin:4px 0;color:var(--mut)}#settings label input[type=checkbox]{margin-right:6px}
+#settings h4{margin:0 0 6px}#settings input[type=text],#settings input[type=number],#settings input[type=password]{width:100%}
+.hbar{display:flex;align-items:center;gap:8px}.hbar .b{height:14px;background:var(--acc);border-radius:3px}
+canvas{width:100%;background:#0c0e12;border:1px solid var(--line);border-radius:8px;display:block}
+.tree{font-size:13px;margin-left:14px}.tree summary{border:0;padding:1px 0}
+kbd{background:#222735;padding:1px 6px;border-radius:4px;font:12px ui-monospace,monospace}
+</style>
+</head>
+<body>
+<header>
+  <h1>SEO Suite</h1>
+  <input id="url" class="url" placeholder="https://yoursite.com">
+  <input id="max" type="number" value="100" min="1" max="100000" style="width:90px" title="Crawl limit (max pages)">
+  <button id="cfgbtn" class="sec">⚙ Crawl settings</button>
+  <button id="run">Run full audit</button>
+  <span id="caps" class="mut"></span>
+</header>
+
+<section id="settings" class="hidden">
+  <div class="cols">
+    <div>
+      <h4>Crawl</h4>
+      <label>Max depth (0 = unlimited) <input id="c_depth" type="number" value="0"></label>
+      <label>Concurrent requests <input id="c_conc" type="number" value="8"></label>
+      <label>Delay between requests (ms) <input id="c_delay" type="number" value="0"></label>
+      <label>User-agent <input id="c_ua" type="text" list="uas" placeholder="SEOSuiteBot/1.0"></label>
+      <datalist id="uas"><option value="Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"><option value="Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"><option value="Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"><option value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"></datalist>
+      <label><input id="c_robots" type="checkbox" checked>Respect robots.txt</label>
+      <label><input id="c_nofollow" type="checkbox">Don't follow nofollow links</label>
+      <label><input id="c_sitemap" type="checkbox">Also crawl sitemap URLs (finds orphans)</label>
+      <label><input id="c_sub" type="checkbox">Crawl subdomains</label>
+      <label><input id="c_ext" type="checkbox" checked>Check external links</label>
+      <label><input id="c_res" type="checkbox" checked>Check images / CSS / JS</label>
+      <label><input id="c_deep" type="checkbox" checked>Deep analysis (near-duplicates, spelling, relevance)</label>
+    </div>
+    <div>
+      <h4>Rendering</h4>
+      <label><input id="c_js" type="checkbox">JavaScript rendering (Chromium)</label>
+      <label><input id="c_mobile" type="checkbox">Mobile emulation + mobile usability</label>
+      <label><input id="c_axe" type="checkbox">axe-core accessibility audit</label>
+      <label>Wait after load (ms) <input id="c_wait" type="number" value="500"></label>
+      <h4 style="margin-top:12px">Custom JavaScript <span class="mut">(runs on each rendered page; use <kbd>return</kbd>)</span></h4>
+      <textarea id="c_cjs" placeholder="return {h1: document.querySelector('h1')?.innerText, imgs: document.images.length}"></textarea>
+      <h4 style="margin-top:12px">Include / exclude URLs <span class="mut">(regex, one per line)</span></h4>
+      <textarea id="c_inc" placeholder="include: ^https://example.com/blog/"></textarea>
+      <textarea id="c_exc" placeholder="exclude: \?sessionid=|/cart"></textarea>
+    </div>
+    <div>
+      <h4>Password-protected sites</h4>
+      <label>Basic auth user <input id="c_bu" type="text"></label>
+      <label>Basic auth password <input id="c_bp" type="password"></label>
+      <label>Extra headers (JSON) <input id="c_hdr" type="text" placeholder='{"Authorization":"Bearer …"}'></label>
+      <label>Cookies (JSON) <input id="c_ck" type="text" placeholder='{"session":"abc"}'></label>
+      <label>Login form URL <input id="c_lu" type="text" placeholder="https://site.com/login"></label>
+      <label>Login fields (JSON) <input id="c_ld" type="text" placeholder='{"username":"me","password":"…"}'></label>
+      <label><input id="c_lc" type="checkbox">Include hidden CSRF fields from the form</label>
+    </div>
+    <div>
+      <h4>Custom search <span class="mut">name|type|value|scope</span></h4>
+      <textarea id="c_cs" placeholder="GA tag|contains|G-XXXX|html&#10;Out of stock|contains|out of stock|text&#10;No analytics|not_contains|gtag(|html&#10;Price|regex|\$\d+\.\d\d|text"></textarea>
+      <h4 style="margin-top:12px">Custom extraction <span class="mut">name|css/xpath/regex|expression|attr</span></h4>
+      <textarea id="c_ce" placeholder="Price|css|.price|text&#10;Author|xpath|//meta[@name='author']/@content|&#10;SKU|regex|sku&quot;:\s*&quot;(\w+)&quot;|"></textarea>
+    </div>
+  </div>
+</section>
+<nav id="tabs"></nav>
+<main id="view"><p class="mut">Enter a URL and run an audit, or open a saved crawl from the <b>Crawls</b> tab.</p></main>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const GROUPS={
+ "Pages":[["internal","Internal pages"],["orphans","Orphans"]],
+ "Response & Links":[["response_codes","Response codes"],["redirects","Redirects & chains"],["broken_links","Broken links"],["inlinks","All internal links"],["external","External links"]],
+ "Titles & Meta":[["titles","Page titles"],["descriptions","Meta descriptions"],["headings","Headings"],["url_issues","URL quality"]],
+ "Images & Files":[["images","Images"],["resources","CSS / JS / images"]],
+ "Directives":[["directives","Robots & canonicals"]],
+ "Hreflang":[["hreflang","Hreflang"]],
+ "Duplicates":[["duplicates_exact","Exact duplicates"],["duplicates_near","Near duplicates"],["semantic","Semantic similarity"],["clusters","Content clusters"],["low_relevance","Low relevance"]],
+ "Content":[["spelling","Spelling & grammar"],["keywords","Keywords"],["javascript","JavaScript"]],
+ "Structured Data":[["structured","Validation"]],
+ "Mobile & A11y":[["mobile","Mobile usability"],["accessibility","Accessibility"],["axe","axe-core (JS)"]],
+ "Security":[["security","Security headers"]],
+ "Custom":[["custom_search","Custom search"],["custom_extraction","Custom extraction"],["javascript","Custom JS / rendering"]],
+};
+const THRESH={duplicates_near:[0.9,"similarity 0–1"],semantic:[0.6,"cosine 0–1"],clusters:[0.22,"cluster tightness"]};
+const TABS=["Overview","Issues","Pages","Response & Links","Titles & Meta","Images & Files","Directives","Hreflang","Duplicates","Content","Structured Data","Mobile & A11y","Security","Visualise","Sitemaps","Custom","Integrations","Segments","Crawls","Export","AI SEO (GEO)","Keywords","AI","AI Fixes","Rank & Backlinks","Traffic","Settings"];
+const NEEDS_CRAWL=t=>!["Crawls","Traffic","Settings","Rank & Backlinks"].includes(t);
+let R=null,CID=null,tab="Overview",sub={},TS={},issueCat="all",CMPA=null;
+const api=async(p,o)=>{const r=await fetch(p,o);const t=await r.text();let j;try{j=JSON.parse(t)}catch{j=t}if(!r.ok)throw new Error(j.detail||t);return j};
+const post=(p,b)=>api(p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+const col=s=>s>=80?"ok":s>=50?"":"bad";
+const lines=id=>$("#"+id).value.split("\n").map(s=>s.trim()).filter(Boolean);
+const wrap=(sel,fn)=>async()=>{const b=$(sel);if(b)b.disabled=true;try{await fn()}catch(e){alert(e.message)}if(b)b.disabled=false};
+const on=(sel,fn)=>{const e=$(sel);if(e)e.onclick=fn};
+const fmt=v=>typeof v==="number"?(Number.isInteger(v)?v.toLocaleString():v):v;
+const dl=(url,name)=>{const a=document.createElement("a");a.href=url;a.download=name||"";a.click()};
+
+function refreshCaps(){api("/api/status").then(s=>$("#caps").textContent=`AI: ${s.ai?s.ai_info.provider:"off"} · GSC: ${s.gsc?"on":"off"} · GA4: ${s.ga?"on":"off"} · SMTP: ${s.smtp?"on":"off"}`)}
+refreshCaps();
+$("#tabs").innerHTML=TABS.map(t=>`<button data-t="${t}">${t}</button>`).join("");
+$("#tabs").onclick=e=>{if(e.target.dataset.t){tab=e.target.dataset.t;render()}};
+$("#cfgbtn").onclick=()=>$("#settings").classList.toggle("hidden");
+
+function getConfig(){
+  const v=id=>$("#"+id).value.trim(),c=id=>$("#"+id).checked,j=(id,l)=>{const s=v(id);if(!s)return undefined;try{return JSON.parse(s)}catch{throw new Error(l+" is not valid JSON")}};
+  const cfg={max_depth:+v("c_depth")||0,concurrency:+v("c_conc")||8,delay_ms:+v("c_delay")||0,respect_robots:c("c_robots"),respect_nofollow:c("c_nofollow"),
+    crawl_sitemap:c("c_sitemap"),crawl_subdomains:c("c_sub"),check_external:c("c_ext"),check_resources:c("c_res"),js_render:c("c_js")||c("c_mobile")||c("c_axe")||!!$("#c_cjs").value.trim(),
+    mobile:c("c_mobile"),axe:c("c_axe"),wait_ms:+v("c_wait")||500,custom_js:$("#c_cjs").value,
+    include:lines("c_inc").map(s=>s.replace(/^include:\s*/,"")),exclude:lines("c_exc").map(s=>s.replace(/^exclude:\s*/,""))};
+  if(v("c_ua"))cfg.user_agent=v("c_ua");
+  const auth={};if(v("c_bu"))auth.basic={user:v("c_bu"),password:$("#c_bp").value};
+  const h=j("c_hdr","Headers"),ck=j("c_ck","Cookies"),ld=j("c_ld","Login fields");
+  if(h)auth.headers=h;if(ck)auth.cookies=ck;if(v("c_lu"))auth.login={url:v("c_lu"),data:ld||{},csrf:c("c_lc")};
+  if(Object.keys(auth).length)cfg.auth=auth;
+  cfg.custom_search=lines("c_cs").map(l=>{const[p,t,val,s]=l.split("|");return{name:p,type:t||"contains",value:val,scope:s||"html"}}).filter(x=>x.value);
+  cfg.extractions=lines("c_ce").map(l=>{const[p,t,e,a]=l.split("|");return{name:p,type:t||"css",expr:e,attr:a||"text"}}).filter(x=>x.expr);
+  return cfg;
+}
+
+async function openCrawl(id){
+  R=await api("/api/crawls/"+id);CID=id;R.crawl_id=id;TS={};$("#url").value=R.site;
+}
+$("#run").onclick=async()=>{
+  const url=$("#url").value.trim();if(!url)return;
+  $("#run").disabled=true;
+  try{
+    const {job_id}=await post("/api/audit",{url,max_pages:+$("#max").value||50,config:getConfig(),deep:$("#c_deep").checked});
+    for(;;){
+      const j=await api("/api/audit/"+job_id);
+      if(j.status==="running"){$("#view").innerHTML=`<div class="card">Crawling… ${j.progress}/${j.total}<div class="bar"><i style="width:${100*j.progress/Math.max(j.total,1)}%"></i></div><div class="mut">${esc(j.current)}</div></div>`;await new Promise(r=>setTimeout(r,800));continue}
+      if(j.status==="error")throw new Error(j.error);
+      R=j.result;CID=R.crawl_id;TS={};break;
+    }
+    tab="Overview";render();
+  }catch(e){$("#view").innerHTML=`<div class="card bad">${esc(e.message)}</div>`}
+  $("#run").disabled=false;
+};
+
+/* ---------- generic server-side table ---------- */
+async function loadTable(el,name){
+  const st=TS[name]||(TS[name]={q:"",sort:-1,desc:false,offset:0});
+  const th=THRESH[name];if(th&&st.threshold==null)st.threshold=th[0];
+  el.innerHTML='<p class="mut">Loading…</p>';
+  const qs=new URLSearchParams({q:st.q,sort:st.sort,desc:st.desc,offset:st.offset,limit:200});if(th)qs.set("threshold",st.threshold);
+  let d;try{d=await api(`/api/crawl/${CID}/report/${name}?`+qs)}catch(e){el.innerHTML=`<p class="bad">${esc(e.message)}</p>`;return}
+  const cell=c=>{const s=String(c??"");return /^https?:\/\//.test(s)?`<a href="${esc(s)}" target="_blank" rel="noopener" title="${esc(s)}">${esc(s)}</a>`:`<span title="${esc(s)}">${esc(fmt(c)??"")}</span>`};
+  el.innerHTML=`<div class="row"><input id="tq" placeholder="Filter…" value="${esc(st.q)}" style="min-width:240px">
+    ${th?`<label class="mut">threshold <input id="tth" type="number" step="0.05" min="0" max="1" value="${st.threshold}" style="width:80px" title="${th[1]}"></label>`:""}
+    <span class="mut">${d.total.toLocaleString()} rows</span><button id="tprev" class="sec sm" ${st.offset?"":"disabled"}>‹ Prev</button><button id="tnext" class="sec sm" ${st.offset+200<d.total?"":"disabled"}>Next ›</button>
+    <a class="btn sec sm" href="/api/crawl/${CID}/export/${name}.csv">⬇ CSV</a></div>
+   <div class="tw"><table><tr>${d.columns.map((c,i)=>`<th data-c="${i}">${esc(c)}${st.sort===i?(st.desc?" ▼":" ▲"):""}</th>`).join("")}</tr>
+   ${d.rows.map(r=>`<tr>${r.map(c=>`<td>${cell(c)}</td>`).join("")}</tr>`).join("")||`<tr><td class="mut" colspan="${d.columns.length}">No rows — nothing found for this report.</td></tr>`}</table></div>`;
+  $("#tq").onchange=e=>{st.q=e.target.value;st.offset=0;loadTable(el,name)};
+  if($("#tth"))$("#tth").onchange=e=>{st.threshold=e.target.value;st.offset=0;loadTable(el,name)};
+  $("#tprev").onclick=()=>{st.offset=Math.max(0,st.offset-200);loadTable(el,name)};
+  $("#tnext").onclick=()=>{st.offset+=200;loadTable(el,name)};
+  el.querySelectorAll("th").forEach(h=>h.onclick=()=>{const c=+h.dataset.c;st.desc=st.sort===c?!st.desc:false;st.sort=c;st.offset=0;loadTable(el,name)});
+}
+function groupView(t){
+  const items=GROUPS[t];sub[t]=sub[t]||items[0][0];
+  return `<div class="card"><div class="row">${items.map(([k,l])=>`<button class="chip ${sub[t]===k?"on":""}" data-sub="${k}">${l}</button>`).join("")}</div><div id="tbl"></div></div>`;
+}
+function afterGroup(t){
+  document.querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>{sub[t]=b.dataset.sub;render()});
+  loadTable($("#tbl"),sub[t]);
+}
+
+/* ---------- issue list ---------- */
+function issueList(list){
+  if(!list.length)return `<p class="ok">No issues found 🎉</p>`;
+  const ord={critical:0,warning:1,info:2};
+  return [...list].sort((a,b)=>ord[a.severity]-ord[b.severity]||b.count-a.count).map(i=>`
+   <details><summary><span class="pill ${i.severity}">${i.severity}</span> <span class="pill info" style="background:#222735;color:var(--mut)">${esc(i.category)}</span> ${esc(i.message)} <span class="mut">(${i.count})</span></summary>
+   ${i.fix_hint?`<div style="margin:6px 0 0 16px">💡 ${esc(i.fix_hint)}</div>`:""}
+   <div class="urls">${i.urls.map(esc).join("<br>")}${i.count>i.urls.length?`<br>… and ${i.count-i.urls.length} more — see Export`:""}</div></details>`).join("");
+}
+const hbars=(obj,color)=>{const m=Math.max(1,...Object.values(obj));return Object.entries(obj).map(([k,v])=>`<div class="hbar"><span style="width:110px" class="mut">${esc(k)}</span><div class="b" style="width:${200*v/m+2}px;${color?`background:${color}`:""}"></div><span>${v}</span></div>`).join("")||'<span class="mut">—</span>'};
+
+/* ---------- views ---------- */
+const views={
+Overview(){
+  const s=R.score.overall,g=R.geo.score,sv=x=>R.issues.filter(i=>i.severity===x).length;
+  return `<div class="grid">
+   <div class="card"><div class="mut">Technical SEO score</div><div class="big ${col(s)}">${s}</div></div>
+   <div class="card"><div class="mut">AI SEO / GEO score</div><div class="big ${col(g)}">${g}</div></div>
+   <div class="card"><div class="mut">Pages crawled</div><div class="big">${R.pages_crawled}</div><div class="mut">${R.duration_s??""}s ${R.js_rendered?"· JS rendered":""}</div></div>
+   <div class="card"><div class="mut">Critical / Warnings / Info</div><div class="big"><span class="bad">${sv("critical")}</span> / <span style="color:var(--warn)">${sv("warning")}</span> / <span style="color:var(--acc)">${sv("info")}</span></div></div></div>
+   <div class="grid"><div class="card"><h3>Score by category</h3>${hbars(R.score.by_category)}</div>
+   <div class="card"><h3>Indexability</h3>${hbars(R.indexability||{},"var(--ok)")}<h3>Status codes</h3>${hbars(R.status_codes||{},"var(--warn)")}</div>
+   <div class="card"><h3>Click depth</h3>${hbars(Object.fromEntries(Object.entries(R.depth||{}).map(([k,v])=>["depth "+k,v])))}</div></div>
+   <div class="card"><h3>Action plan</h3><button id="plan">Generate prioritized plan</button> <a class="btn sec" target="_blank" href="/api/crawl/${CID}/report.html">Open printable report</a><pre id="planout" class="hidden"></pre></div>
+   <div class="card"><h3>Top issues</h3>${issueList(R.issues.filter(i=>i.severity==="critical").slice(0,8))}</div>`;
+},
+Issues(){
+  const cats=["all",...new Set(R.issues.map(i=>i.category))];
+  return `<div class="card"><div class="row">${cats.map(c=>`<button class="chip ${issueCat===c?"on":""}" data-cat="${c}">${c}</button>`).join("")}<a class="btn sec sm" href="/api/crawl/${CID}/export/issues.csv">⬇ All issues CSV</a></div>
+   ${issueList(R.issues.filter(i=>issueCat==="all"||i.category===issueCat))}</div>`;
+},
+Visualise(){return `<div class="card"><h3>Internal link graph <span class="mut">(top 250 pages by link score; node size = link score; red ring = non-indexable; colour = top folder)</span></h3>
+  <canvas id="gc" height="560"></canvas><div id="gtip" class="mut" style="min-height:22px;margin-top:6px"></div></div>
+  <div class="grid"><div class="card"><h3>Directory tree</h3><div id="dtree">Loading…</div></div><div class="card"><h3>Crawl depth</h3><div id="dhist"></div></div></div>`},
+Sitemaps(){return `<div class="card"><h3>XML sitemap generator</h3><p class="mut">Built from this crawl: only indexable, 200-status, canonical pages. Splits at 50,000 URLs with an index file.</p>
+  <div class="row"><label><input id="sm_img" type="checkbox"> image entries</label><label><input id="sm_hl" type="checkbox" checked> hreflang annotations</label>
+  <label><input id="sm_pr" type="checkbox" checked> priority by depth</label><label><input id="sm_ni" type="checkbox"> include noindex</label>
+  <select id="sm_cf"><option value="">changefreq: none</option><option>always</option><option>hourly</option><option>daily</option><option>weekly</option><option>monthly</option><option>yearly</option></select>
+  <button id="sm_prev" class="sec">Preview</button><button id="sm_dl">Download</button></div><pre id="sm_out" class="hidden" style="max-height:300px"></pre></div>
+  <div class="card" id="smt"></div>`},
+Custom(){return groupView("Custom")+`<div class="card mut">Configure rules in <b>⚙ Crawl settings → Custom search / extraction / JavaScript</b>, then re-run the audit.</div>`},
+Integrations(){return `<div class="grid">
+  <div class="card"><h3>PageSpeed Insights</h3><div class="row"><input id="psiu" placeholder="https://…" value="${esc(R.site)}/" style="flex:1;min-width:200px"><select id="psis"><option>mobile</option><option>desktop</option></select><button id="psi">Run</button></div>
+   <div class="row"><input id="psin" type="number" value="10" style="width:70px"><button id="psib" class="sec">Run top N pages of crawl</button></div><div id="psiout"></div></div>
+  <div class="card"><h3>Search Console + GA4 + first-party traffic merged with crawl</h3><p class="mut">Finds non-indexable pages with traffic, orphans with traffic, high-impression/low-CTR pages and un-crawled URLs that get visits.</p>
+   <div class="row"><select id="en_days"><option>28</option><option>7</option><option>90</option></select><button id="enrich">Merge analytics</button></div></div></div>
+  <div id="enout"></div>
+  <div class="grid"><div class="card"><h3>Search Console: top pages</h3><button id="gscp" class="sec">Fetch pages</button><div id="gscpout"></div></div>
+  <div class="card"><h3>URL Inspection (Google index status)</h3><textarea id="insp" placeholder="One URL per line (max 50)"></textarea><div class="row" style="margin-top:8px"><button id="inspb">Inspect</button></div><div id="inspout"></div></div>
+  <div class="card"><h3>Google Analytics 4: pages</h3><button id="gab" class="sec">Fetch</button><div id="gaout"></div></div></div>
+  <p class="mut">Credentials: <b>Settings</b> tab (kept in memory only) or environment variables.</p>`},
+Segments(){return `<div class="card"><h3>Segments</h3><p class="mut">Group URLs by rules and compare health per segment. ${"Default: top folders + non-indexable + thin."}</p><div id="segout">Loading…</div></div>
+  <div class="card"><h3>New segment</h3><div class="row"><input id="sg_name" placeholder="Name e.g. Blog"><select id="sg_match"><option value="all">match ALL rules</option><option value="any">match ANY rule</option></select></div>
+  <textarea id="sg_rules" placeholder="field op value — one per line&#10;folder eq blog&#10;words lt 300&#10;indexability eq Indexable&#10;issue:missing_desc eq true&#10;path regex ^/products/"></textarea>
+  <p class="mut">Fields: <span id="sgf"></span><br>Ops: eq ne contains not_contains regex gt lt gte lte empty not_empty</p><button id="sg_save">Save segment</button></div>`},
+Crawls(){return `<div class="card"><h3>Saved crawls</h3><div id="crawllist">Loading…</div><div id="cmpout"></div></div>
+  <div class="card"><h3>Scheduled crawls</h3><div id="schedlist"></div>
+  <h4>New schedule</h4><div class="row"><input id="sc_url" placeholder="https://site.com" value="${esc($("#url").value)}"><select id="sc_every"><option>hourly</option><option selected>daily</option><option>weekly</option><option>monthly</option></select>
+  <label class="mut">at hour <input id="sc_hour" type="number" value="3" min="0" max="23" style="width:60px"></label><input id="sc_email" placeholder="email for digest (optional)"><select id="sc_exp"><option value="">no attachments</option><option>xlsx</option><option>csv</option><option>json</option></select>
+  <select id="sc_on"><option value="changes">email on changes</option><option value="always">always email</option></select><button id="sc_add">Add schedule</button></div>
+  <p class="mut">Uses the current ⚙ crawl settings and max pages. Runs while this server is up; for headless use <kbd>python -m app.cli run-due</kbd> from cron / Task Scheduler. Email needs SMTP in <b>Settings</b>.</p></div>`},
+Export(){const names=["internal","response_codes","redirects","broken_links","titles","descriptions","directives","hreflang","duplicates_exact","duplicates_near","structured","images","security","accessibility","issues"];
+  return `<div class="card"><h3>Export</h3><div class="row"><a class="btn" href="/api/crawl/${CID}/export.xlsx">⬇ Excel workbook (all key reports)</a><a class="btn sec" href="/api/crawl/${CID}/export.json">⬇ JSON</a><a class="btn sec" target="_blank" href="/api/crawl/${CID}/report.html">Printable HTML report</a></div>
+   <div class="row">${names.map(n=>`<a class="btn sec sm" href="/api/crawl/${CID}/export/${n}.csv">${n}.csv</a>`).join("")}</div></div>
+   <div class="card"><h3>Looker Studio / Google Sheets crawl report</h3><p class="mut">This URL always returns the <b>latest</b> crawl of the site. In Google Sheets use <kbd>=IMPORTDATA("…")</kbd>, then connect the sheet to Looker Studio (Data Studio). The server must be reachable by Google (deploy it or use a tunnel).</p>
+   <pre>=IMPORTDATA("${location.origin}/api/feed/internal.csv?site=${encodeURIComponent(R.site)}")
+=IMPORTDATA("${location.origin}/api/feed/issues.csv?site=${encodeURIComponent(R.site)}")</pre></div>
+   <div class="card"><h3>Email this crawl</h3><div class="row"><input id="em_to" placeholder="you@company.com"><select id="em_fmt"><option value="">digest only</option><option>xlsx</option><option>csv</option><option>json</option></select><button id="em_send">Send</button></div></div>
+   <div class="card"><h3>Command line &amp; MCP</h3><pre>python -m app.cli crawl ${esc(R.site)} --max-pages 500 --export-dir out --formats xlsx,csv --compare-last --fail-on critical
+python -m app.cli run-due          # run due schedules (cron / Task Scheduler)
+claude mcp add seo-suite -- python -m app.cli mcp</pre></div>`},
+"AI SEO (GEO)"(){
+  return `<div class="card"><h3>GEO readiness: <span class="${col(R.geo.score)}">${R.geo.score}/100</span></h3>
+  <p class="mut">How well AI answer engines (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews) can find, understand and cite you.</p>
+  <table>${R.geo.checks.map(c=>`<tr><td>${c.passed?"✅":"⚠️"}</td><td>${esc(c.name)}</td><td class="mut">${esc(c.detail)}</td><td>${c.points}/${c.max}</td></tr>`).join("")}</table></div>
+  <div class="card"><h3>AI crawler access (robots.txt)</h3><table>${R.geo.ai_bots.map(b=>`<tr><td>${esc(b.bot)}</td><td class="mut">${esc(b.purpose)}</td><td class="${b.status==="allowed"?"ok":"bad"}">${b.status}</td></tr>`).join("")}</table></div>
+  <div class="card"><h3>Issues</h3>${issueList(R.issues.filter(i=>i.category==="geo"))}</div>
+  <div class="card"><h3>llms.txt generator</h3><button id="llms" class="sec">Generate llms.txt</button><pre id="llmsout" class="hidden"></pre></div>`;
+},
+Keywords(){
+  return `<div class="card"><h3>Your site's top keywords</h3><table><tr><th>Keyword</th><th>Count</th><th>Pages</th></tr>
+   ${R.keywords.map(k=>`<tr><td>${esc(k.keyword)}</td><td>${k.occurrences}</td><td>${k.pages}</td></tr>`).join("")}</table></div>
+   <div class="card"><h3>Keyword ideas & content gaps</h3><div class="row"><input id="seed" placeholder="seed keyword"><button id="ideas">Find ideas</button><button id="brief" class="sec">AI content brief</button></div><div id="kwout"></div></div>`;
+},
+AI(){return `<div class="card"><h3>AI provider</h3><div id="aiinfo" class="mut">Loading…</div><p class="mut">Supports Anthropic, OpenAI, Gemini and local Ollama. Configure in <b>Settings</b>.</p></div>
+  <div class="card"><h3>Run a prompt over your pages</h3><p class="mut">Placeholders: <kbd>{url}</kbd> <kbd>{title}</kbd> <kbd>{h1}</kbd> <kbd>{description}</kbd> <kbd>{text}</kbd> <kbd>{words}</kbd></p>
+   <textarea id="ai_prompt">Classify the search intent of this page (informational / commercial / transactional / navigational) and give one sentence why.\nURL: {url}\nTitle: {title}\nContent: {text}</textarea>
+   <div class="row" style="margin-top:8px"><label class="mut">pages <input id="ai_n" type="number" value="10" style="width:70px"></label><button id="ai_run">Run</button></div><div id="ai_out"></div></div>
+  <div class="card"><h3>Semantic similarity with real embeddings</h3><p class="mut">Needs OpenAI, Gemini or Ollama. (A free local TF-IDF version is under Duplicates.)</p><button id="ai_sem" class="sec">Compute embeddings &amp; clusters</button><div id="ai_semout"></div></div>`},
+"AI Fixes"(){
+  return `<div class="card"><div class="row"><select id="fpage" style="max-width:100%"></select>
+   <button data-fix="meta">Rewrite title + meta</button><button data-fix="faq" class="sec">FAQ schema</button><button data-fix="alt" class="sec">Alt-text guide</button></div><pre id="fixout" class="hidden"></pre></div>`;
+},
+"Rank & Backlinks"(){
+  return `<div class="card"><h3>Rank tracking</h3><p class="mut">Needs DataForSEO credentials. History is stored locally.</p>
+   <div class="row"><input id="tk" placeholder="keywords, comma separated" style="min-width:300px"><button id="track" class="sec">Track</button><button id="rcheck">Check positions now</button></div><div id="rout"></div></div>
+   <div class="card"><h3>Backlinks</h3><button id="bl">Fetch summary</button><div id="blout"></div></div>
+   <div class="card"><h3>Google Search Console (top queries)</h3><button id="gsc">Fetch</button><div id="gscout"></div></div>`;
+},
+Settings(){return `<div class="card"><h3>Credentials &amp; integrations</h3><p class="mut">Stored in server memory only (lost on restart, never written to disk). For permanent setup use environment variables. Leave a field empty to clear it.</p>
+  <div id="setform">Loading…</div><div class="row" style="margin-top:10px"><button id="setsave">Save</button><button id="smtptest" class="sec">Send test email</button></div></div>`}
+};
+for(const t of Object.keys(GROUPS))if(t!=="Custom")views[t]=()=>groupView(t);
+
+/* ---------- post-render wiring ---------- */
+const afters={
+Overview(){on("#plan",wrap("#plan",async()=>{const r=await post("/api/plan",{site:R.site,issues:R.issues});const o=$("#planout");o.textContent=r.plan+(r.ai?"":"\n\n(Rule-based; configure an AI provider for AI planning)");o.classList.remove("hidden")}))},
+Issues(){document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{issueCat=b.dataset.cat;render()})},
+Visualise(){loadViz()},
+Sitemaps(){
+  const q=prev=>`/api/crawl/${CID}/sitemap?images=${$("#sm_img").checked}&hreflang=${$("#sm_hl").checked}&priority=${$("#sm_pr").checked}&include_noindex=${$("#sm_ni").checked}&changefreq=${$("#sm_cf").value}&preview=${prev}`;
+  on("#sm_prev",wrap("#sm_prev",async()=>{const t=await api(q(true));const o=$("#sm_out");o.textContent=typeof t==="string"?t:"(multiple files — use Download for a ZIP)";o.classList.remove("hidden")}));
+  on("#sm_dl",()=>dl(q(false)));
+  sub["Sitemaps_"]=sub["Sitemaps_"]||"sitemaps";
+  const items=[["sitemaps","Sitemap files"],["sitemap_urls","Sitemap URLs vs crawl"]];
+  $("#smt").innerHTML=`<div class="row">${items.map(([k,l])=>`<button class="chip ${sub.Sitemaps_===k?"on":""}" data-sub2="${k}">${l}</button>`).join("")}</div><div id="tbl"></div>`;
+  document.querySelectorAll("[data-sub2]").forEach(b=>b.onclick=()=>{sub.Sitemaps_=b.dataset.sub2;afters.Sitemaps()});
+  loadTable($("#tbl"),sub.Sitemaps_);
+},
+Custom(){afterGroup("Custom")},
+Integrations(){
+  const tbl=(rows,cols)=>`<div class="tw"><table><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(fmt(c)??"")}</td>`).join("")}</tr>`).join("")}</table></div>`;
+  const psiCard=r=>r.error?`<p class="bad">${esc(r.url)}: ${esc(r.error)}</p>`:`<details open><summary><b>${esc(r.url)}</b> (${r.strategy}) — perf <span class="${col(r.scores.performance)}">${r.scores.performance}</span> · a11y ${r.scores.accessibility} · BP ${r.scores["best-practices"]} · SEO ${r.scores.seo}</summary>
+    <div class="mut">LCP ${Math.round(r.lab.lcp_ms)}ms · FCP ${Math.round(r.lab.fcp_ms)}ms · TBT ${Math.round(r.lab.tbt_ms)}ms · CLS ${(+r.lab.cls).toFixed(3)} · SI ${Math.round(r.lab.speed_index_ms)}ms · field: ${esc(r.overall_field_rating||"n/a")}</div>
+    ${r.opportunities.map(o=>`<div>• ${esc(o.title)} — save ${o.savings_ms}ms${o.savings_kb?` / ${o.savings_kb}KB`:""}</div>`).join("")}</details>`;
+  on("#psi",wrap("#psi",async()=>{$("#psiout").innerHTML=psiCard(await api(`/api/psi?url=${encodeURIComponent($("#psiu").value)}&strategy=${$("#psis").value}`))}));
+  on("#psib",wrap("#psib",async()=>{$("#psiout").innerHTML="<p class='mut'>Running… (about 15 s per page)</p>";const r=await post("/api/psi/batch",{crawl_id:CID,limit:+$("#psin").value,strategy:$("#psis").value});$("#psiout").innerHTML=r.map(psiCard).join("")}));
+  on("#enrich",wrap("#enrich",async()=>{const r=await api(`/api/crawl/${CID}/enrich?days=${$("#en_days").value}`);
+    $("#enout").innerHTML=`<div class="card"><h3>Crawl + analytics</h3>${r.notes.length?`<p class="mut">${r.notes.map(esc).join("<br>")}</p>`:""}
+     ${tbl(r.rows.filter(x=>x.flags).concat(r.rows.filter(x=>!x.flags)).slice(0,300).map(x=>[x.url,x.indexability,x.fp_views??"",x.gsc_clicks??"",x.gsc_impressions??"",x.gsc_position??"",x.ga_sessions??"",x.flags]),["URL","Indexability","1st-party views","GSC clicks","GSC impr.","GSC pos","GA sessions","Flags"])}
+     ${r.not_crawled.length?`<h4>Getting traffic but not in the crawl</h4>${tbl(r.not_crawled.map(x=>[x.path,x.gsc_clicks??"",x.ga_sessions??""]),["Path","GSC clicks","GA sessions"])}`:""}</div>`}));
+  on("#gscp",wrap("#gscp",async()=>{const r=await api("/api/gsc/pages?site="+encodeURIComponent(R.site+"/"));$("#gscpout").innerHTML=tbl(r.slice(0,100).map(x=>[x.url,x.clicks,x.impressions,x.ctr,x.position]),["Page","Clicks","Impr.","CTR%","Pos"])}));
+  on("#inspb",wrap("#inspb",async()=>{const r=await post("/api/gsc/inspect",{site:R.site+"/",urls:lines("insp")});$("#inspout").innerHTML=tbl(r.map(x=>[x.url,x.verdict,x.coverage,x.last_crawl,x.google_canonical,x.mobile]),["URL","Verdict","Coverage","Last crawl","Google canonical","Mobile"])}));
+  on("#gab",wrap("#gab",async()=>{const r=await api("/api/ga");$("#gaout").innerHTML=tbl(r.slice(0,100).map(x=>[x.path,x.views,x.sessions,x.users,x.engagement_rate,x.conversions]),["Path","Views","Sessions","Users","Engage %","Conv."])}));
+},
+Segments(){
+  api(`/api/crawl/${CID}/segments`).then(d=>{
+    $("#sgf").textContent=d.fields.join(", ");
+    $("#segout").innerHTML=`<div class="tw"><table><tr><th>Segment</th><th>Pages</th><th>Indexable</th><th>Errors</th><th>Avg words</th><th>Avg load ms</th><th>Issues</th><th>Top issues</th><th></th></tr>
+     ${d.segments.map(s=>`<tr><td>${esc(s.name)}</td><td>${s.pages}</td><td>${s.indexable}</td><td>${s.errors}</td><td>${s.avg_words}</td><td>${s.avg_load_ms}</td><td>${s.issues}</td><td class="mut" style="white-space:normal">${esc(s.top_issues.join(", "))}</td>
+     <td>${d.custom?`<button class="sec sm" data-delseg="${esc(s.name)}">✕</button>`:""}</td></tr>`).join("")}</table></div>`;
+    document.querySelectorAll("[data-delseg]").forEach(b=>b.onclick=async()=>{await api(`/api/segments?site=${encodeURIComponent(R.site)}&name=${encodeURIComponent(b.dataset.delseg)}`,{method:"DELETE"});render()});
+  }).catch(e=>$("#segout").innerHTML=`<span class="bad">${esc(e.message)}</span>`);
+  on("#sg_save",wrap("#sg_save",async()=>{const rules=lines("sg_rules").map(l=>{const m=l.match(/^(\S+)\s+(\S+)\s*(.*)$/);return m?{field:m[1],op:m[2],value:m[3]}:null}).filter(Boolean);
+    if(!$("#sg_name").value||!rules.length)throw new Error("Name and at least one rule are required");
+    await post("/api/segments",{site:R.site,name:$("#sg_name").value,match:$("#sg_match").value,rules});render()}));
+},
+Crawls(){loadCrawls()},
+Export(){on("#em_send",wrap("#em_send",async()=>{await post(`/api/crawl/${CID}/email`,{to:$("#em_to").value,formats:$("#em_fmt").value?[$("#em_fmt").value]:[]});alert("Sent")}))},
+"AI SEO (GEO)"(){on("#llms",wrap("#llms",async()=>{const t=await api("/api/llms-txt?site="+encodeURIComponent(R.site));const o=$("#llmsout");o.textContent=t;o.classList.remove("hidden")}))},
+Keywords(){
+  on("#ideas",wrap("#ideas",async()=>{const r=await post("/api/keywords/ideas",{seed:$("#seed").value,site:R.site});$("#kwout").innerHTML=`<h4>Content gaps (${r.content_gaps.length})</h4><p>${r.content_gaps.map(esc).join(" · ")||"—"}</p><h4>All ideas (${r.ideas.length})</h4><p class="mut">${r.ideas.map(esc).join(" · ")}</p>`}));
+  on("#brief",wrap("#brief",async()=>{const r=await post("/api/brief",{keyword:$("#seed").value});$("#kwout").innerHTML=`<pre>${esc(r.brief)}</pre>`}));
+},
+AI(){
+  api("/api/ai/info").then(i=>$("#aiinfo").innerHTML=i.available?`Active: <b>${esc(i.provider)}</b> · model <b>${esc(i.model)}</b> · embeddings: ${i.embeddings?"yes":"no"}`:"No provider configured.");
+  on("#ai_run",wrap("#ai_run",async()=>{$("#ai_out").innerHTML="<p class='mut'>Running…</p>";const r=await post("/api/ai/batch",{crawl_id:CID,prompt:$("#ai_prompt").value,limit:+$("#ai_n").value});
+    $("#ai_out").innerHTML=`<div class="tw"><table><tr><th>URL</th><th>Result</th></tr>${r.map(x=>`<tr><td>${esc(x.url)}</td><td style="white-space:normal;max-width:700px">${esc(x.result)}</td></tr>`).join("")}</table></div>`}));
+  on("#ai_sem",wrap("#ai_sem",async()=>{const r=await post(`/api/crawl/${CID}/semantic-ai`,{});$("#ai_semout").innerHTML=`<h4>Similar pairs</h4>${r.pairs.map(p=>`<div>${p.similarity}% — ${esc(p.a)} ≈ ${esc(p.b)}</div>`).join("")||"—"}<h4>Clusters</h4>${r.clusters.map(c=>`<details><summary>${esc(c.label)} (${c.urls.length})</summary><div class="urls">${c.urls.map(esc).join("<br>")}</div></details>`).join("")}`}));
+},
+"AI Fixes"(){
+  api(`/api/crawl/${CID}/report/internal?limit=500`).then(d=>{$("#fpage").innerHTML=d.rows.filter(r=>r[1]===200).map(r=>`<option value="${esc(r[0])}">${esc(r[0])}</option>`).join("")});
+  document.querySelectorAll("[data-fix]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{const r=await post("/api/fix",{site:R.site,url:$("#fpage").value,kind:b.dataset.fix});const o=$("#fixout");o.textContent=JSON.stringify(r,null,2);o.classList.remove("hidden")}catch(e){alert(e.message)}b.disabled=false});
+},
+"Rank & Backlinks"(){
+  const site=R?R.site:$("#url").value;
+  on("#track",wrap("#track",async()=>{const r=await post("/api/rank/track",{site,keywords:$("#tk").value.split(",").map(s=>s.trim()).filter(Boolean)});$("#rout").innerHTML="Tracking: "+r.tracked.map(esc).join(", ")}));
+  on("#rcheck",wrap("#rcheck",async()=>{const r=await post("/api/rank/check?site="+encodeURIComponent(site),{});$("#rout").innerHTML=`<table>${r.map(x=>`<tr><td>${esc(x.keyword)}</td><td>${x.position??"not in top 100"}</td><td class="mut">${esc(x.url||"")}</td></tr>`).join("")}</table>`}));
+  on("#bl",wrap("#bl",async()=>{const r=await api("/api/backlinks?site="+encodeURIComponent(site));$("#blout").innerHTML=`<table>${Object.entries(r).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</table>`}));
+  on("#gsc",wrap("#gsc",async()=>{const r=await api("/api/gsc?site="+encodeURIComponent(site));$("#gscout").innerHTML=`<table><tr><th>Query</th><th>Clicks</th><th>Impr.</th><th>CTR%</th><th>Pos</th></tr>${r.map(x=>`<tr><td>${esc(x.query)}</td><td>${x.clicks}</td><td>${x.impressions}</td><td>${x.ctr}</td><td>${x.position}</td></tr>`).join("")}</table>`}));
+},
+Traffic(){},
+Settings(){
+  api("/api/settings").then(s=>{$("#setform").innerHTML=`<div class="grid">${Object.entries(s).map(([k,v])=>`<label class="mut">${k}<input data-set="${k}" type="${/KEY|SECRET|TOKEN|PASSWORD/.test(k)?"password":"text"}" placeholder="${v&&v.startsWith("••")?v:""}" value="${v&&v.startsWith("••")?"":esc(v)}" style="width:100%"></label>`).join("")}</div>`});
+  on("#setsave",wrap("#setsave",async()=>{const vals={};document.querySelectorAll("[data-set]").forEach(i=>{if(i.value!==""||!i.placeholder)vals[i.dataset.set]=i.value});await post("/api/settings",vals);refreshCaps();alert("Saved (this session only)");render()}));
+  on("#smtptest",wrap("#smtptest",async()=>{const to=prompt("Send a test email to:");if(!to)return;if(!CID)throw new Error("Open a crawl first");await post(`/api/crawl/${CID}/email`,{to,formats:[]});alert("Sent")}));
+}};
+
+/* ---------- visualisation ---------- */
+async function loadViz(){
+  const d=await api(`/api/crawl/${CID}/graph`);
+  const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+  const cv=$("#gc");if(!cv)return;const W=cv.width=cv.clientWidth,H=cv.height=560,ctx=cv.getContext("2d");
+  const N=d.graph.nodes.map((n,i)=>({...n,x:W/2+(Math.random()-.5)*400,y:H/2+(Math.random()-.5)*300,vx:0,vy:0,r:3+n.score/14}));
+  const ix=Object.fromEntries(N.map((n,i)=>[n.id,i])),E=d.graph.edges.map(([a,b])=>[ix[a],ix[b]]);let it=0,hover=null;
+  function step(){
+    for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){const a=N[i],b=N[j];let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+.1,f=2200/d2;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f}
+    for(const[i,j]of E){const a=N[i],b=N[j];let dx=b.x-a.x,dy=b.y-a.y,dist=Math.sqrt(dx*dx+dy*dy)||1,f=.012*(dist-70)/dist;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f}
+    for(const n of N){n.vx+=(W/2-n.x)*.004;n.vy+=(H/2-n.y)*.004;n.vx*=.82;n.vy*=.82;n.x=Math.max(10,Math.min(W-10,n.x+n.vx));n.y=Math.max(10,Math.min(H-10,n.y+n.vy))}
+  }
+  function draw(){ctx.clearRect(0,0,W,H);ctx.strokeStyle="rgba(150,160,190,.10)";ctx.beginPath();for(const[i,j]of E){ctx.moveTo(N[i].x,N[i].y);ctx.lineTo(N[j].x,N[j].y)}ctx.stroke();
+    for(const n of N){ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.fillStyle=`hsl(${hue(n.folder)},65%,58%)`;ctx.fill();if(!n.indexable||n===hover){ctx.lineWidth=2;ctx.strokeStyle=n===hover?"#fff":"#f46a6a";ctx.stroke()}}}
+  (function loop(){if(!$("#gc"))return;if(it++<350)step();draw();if(it<360||hover)requestAnimationFrame(loop)})();
+  cv.onmousemove=e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;hover=N.find(n=>(n.x-x)**2+(n.y-y)**2<(n.r+3)**2)||null;
+    $("#gtip").textContent=hover?`${hover.id} — depth ${hover.depth}, link score ${hover.score}${hover.indexable?"":" · NON-INDEXABLE"}`:"";if(it>=360)draw()};
+  cv.onclick=()=>hover&&window.open(hover.id,"_blank");
+  const tree=(n,open)=>n.children.length?`<details class="tree" ${open?"open":""}><summary>${esc(n.name)} <span class="mut">(${n.count})</span></summary>${n.children.map(c=>tree(c,false)).join("")}</details>`:`<div class="tree">${esc(n.name)} <span class="mut">(${n.count})</span></div>`;
+  $("#dtree").innerHTML=tree(d.tree,true);
+  $("#dhist").innerHTML=hbars(Object.fromEntries(Object.entries(d.depth).map(([k,v])=>["depth "+k,v])));
+}
+
+/* ---------- crawls / schedules ---------- */
+async function loadCrawls(){
+  const [cs,ss]=await Promise.all([api("/api/crawls"),api("/api/schedules")]);
+  const when=t=>t?new Date(t*1000).toLocaleString():"—";
+  $("#crawllist").innerHTML=cs.length?`<div class="tw"><table><tr><th></th><th>#</th><th>Site</th><th>When</th><th>Pages</th><th>Score</th><th>GEO</th><th>Label</th><th></th></tr>
+   ${cs.map(c=>`<tr><td><input type="checkbox" data-cmp="${c.id}"></td><td>${c.id}</td><td>${esc(c.site)}</td><td>${when(c.created)}</td><td>${c.pages}</td><td>${c.score??""}</td><td>${c.geo_score??""}</td><td>${esc(c.label||"")}</td>
+   <td><button class="sm" data-open="${c.id}">Open</button> <button class="sm sec" data-del="${c.id}">Delete</button></td></tr>`).join("")}</table></div>
+   <div class="row" style="margin-top:10px"><button id="cmpbtn" class="sec">Compare the 2 ticked crawls (older → newer)</button></div>`:'<p class="mut">No saved crawls yet — every audit is saved automatically.</p>';
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=async()=>{await openCrawl(+b.dataset.open);tab="Overview";render()});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(confirm("Delete crawl #"+b.dataset.del+"?")){await api("/api/crawls/"+b.dataset.del,{method:"DELETE"});if(+b.dataset.del===CID){R=null;CID=null}loadCrawls()}});
+  on("#cmpbtn",wrap("#cmpbtn",async()=>{const ids=[...document.querySelectorAll("[data-cmp]:checked")].map(i=>+i.dataset.cmp).sort((a,b)=>a-b);if(ids.length!==2)throw new Error("Tick exactly two crawls");
+    const d=await api(`/api/compare?old=${ids[0]}&new=${ids[1]}`),s=d.summary;
+    $("#cmpout").innerHTML=`<h4>#${ids[0]} → #${ids[1]}</h4><div class="grid"><div class="card"><div class="mut">New URLs</div><div class="big">${s.added}</div></div><div class="card"><div class="mut">Removed URLs</div><div class="big">${s.removed}</div></div>
+     <div class="card"><div class="mut">URLs with changes</div><div class="big">${s.changed_urls}</div></div><div class="card"><div class="mut">Issues worse / better</div><div class="big"><span class="bad">${s.issues_worse}</span> / <span class="ok">${s.issues_better}</span></div></div></div>
+     <h4>Issue changes</h4><div class="tw"><table><tr><th>Issue</th><th>Was</th><th>Now</th><th>Δ</th><th>Newly affected</th><th>Fixed</th></tr>${d.issue_changes.map(c=>`<tr><td><span class="pill ${c.severity}">${c.severity}</span> ${esc(c.message)}</td><td>${c.old}</td><td>${c.new}</td><td class="${c.delta>0?"bad":"ok"}">${c.delta>0?"+":""}${c.delta}</td><td class="mut" style="white-space:normal">${c.newly_affected.slice(0,3).map(esc).join("<br>")}</td><td class="mut" style="white-space:normal">${c.fixed.slice(0,3).map(esc).join("<br>")}</td></tr>`).join("")}</table></div>
+     <h4>Added URLs</h4><pre>${d.added.slice(0,100).map(esc).join("\n")||"—"}</pre><h4>Removed URLs</h4><pre>${d.removed.slice(0,100).map(esc).join("\n")||"—"}</pre>
+     <h4>Changed fields (${d.changes.length})</h4><div class="tw"><table><tr><th>URL</th><th>Field</th><th>Before</th><th>After</th></tr>${d.changes.slice(0,500).map(c=>`<tr><td>${esc(c.url)}</td><td>${esc(c.field)}</td><td>${esc(c.old)}</td><td>${esc(c.new)}</td></tr>`).join("")}</table></div>`}));
+  $("#schedlist").innerHTML=ss.length?`<div class="tw"><table><tr><th>#</th><th>Site</th><th>Every</th><th>Next run</th><th>Last run</th><th>Email</th><th>On</th><th></th></tr>${ss.map(s=>`<tr><td>${s.id}</td><td>${esc(s.site)}</td><td>${s.every}</td><td>${when(s.next_run)}</td><td>${when(s.last_run)}${s.last_crawl?` (#${s.last_crawl})`:""}</td><td>${esc(s.email||"")}</td><td>${s.enabled?"✅":"⏸"}</td>
+   <td><button class="sm" data-run="${s.id}">Run now</button> <button class="sm sec" data-tog="${s.id}" data-en="${s.enabled?0:1}">${s.enabled?"Pause":"Resume"}</button> <button class="sm sec" data-dels="${s.id}">✕</button></td></tr>`).join("")}</table></div>`:'<p class="mut">No schedules.</p>';
+  document.querySelectorAll("[data-run]").forEach(b=>b.onclick=async()=>{await api(`/api/schedules/${b.dataset.run}/run`,{method:"POST"});alert("Started in the background — refresh the list in a minute.")});
+  document.querySelectorAll("[data-tog]").forEach(b=>b.onclick=async()=>{await api(`/api/schedules/${b.dataset.tog}/toggle?enabled=${b.dataset.en==="1"}`,{method:"POST"});loadCrawls()});
+  document.querySelectorAll("[data-dels]").forEach(b=>b.onclick=async()=>{await api("/api/schedules/"+b.dataset.dels,{method:"DELETE"});loadCrawls()});
+  on("#sc_add",wrap("#sc_add",async()=>{const cfg=getConfig();cfg.max_pages=+$("#max").value||100;await post("/api/schedules",{site:$("#sc_url").value,config:cfg,every:$("#sc_every").value,hour:+$("#sc_hour").value,email:$("#sc_email").value,exports:$("#sc_exp").value,notify_on:$("#sc_on").value});loadCrawls()}));
+}
+
+/* ---------- traffic (first-party) ---------- */
+let TSITE="",TDAYS=30;
+async function renderTraffic(){
+  const view=$("#view");
+  try{
+    const sites=await api("/api/traffic/sites");
+    if(!TSITE||!sites.find(s=>s.host===TSITE))TSITE=sites[0]?.host||"";
+    let h=`<div class="card"><h3>Pinned sites</h3><div class="row"><input id="pinurl" placeholder="https://yoursite.com" value="${esc(R?R.site:$("#url").value)}" style="min-width:280px"><button id="pin">Pin site</button></div>
+     ${sites.length?`<div class="row" style="margin-top:10px">${sites.map(s=>`<button class="${s.host===TSITE?"":"sec"}" data-pick="${esc(s.host)}">${esc(s.host)} <span class="mut">(${s.hits})</span></button>`).join("")}</div>`:`<p class="mut">No site pinned yet.</p>`}</div>`;
+    if(TSITE){
+      const st=await api(`/api/traffic/stats?site=${encodeURIComponent(TSITE)}&days=${TDAYS}`);
+      const origin=location.origin,snippet=`<script defer src="${origin}/t.js" data-site="${TSITE}"><\/script>`;
+      const max=Math.max(1,...st.daily.map(d=>d.views));
+      const tbl=(rows,k,label)=>rows.length?`<table><tr><th>${label}</th><th>Views</th></tr>${rows.map(r=>`<tr><td>${esc(r[k])}</td><td>${r.views}</td></tr>`).join("")}</table>`:`<p class="mut">No data yet.</p>`;
+      h+=`<div class="card"><div class="row"><b>${esc(TSITE)}</b><select id="tdays">${[7,30,90].map(d=>`<option value="${d}" ${d===TDAYS?"selected":""}>Last ${d} days</option>`).join("")}</select><button id="unpin" class="sec">Unpin</button></div></div>
+       <div class="grid"><div class="card"><div class="mut">Page views</div><div class="big">${st.views}</div></div><div class="card"><div class="mut">Visitors (sum of daily uniques)</div><div class="big">${st.visitors}</div></div><div class="card"><div class="mut">Active now (5 min)</div><div class="big ok">${st.live_now}</div></div></div>
+       <div class="card"><h3>Views per day</h3><div style="display:flex;align-items:flex-end;gap:2px;height:110px">${st.daily.map(d=>`<div title="${d.day}: ${d.views} views, ${d.visitors} visitors" style="flex:1;background:var(--acc);min-height:2px;height:${Math.max(2,100*d.views/max)}%;opacity:${d.views?1:.25}"></div>`).join("")}</div></div>
+       <div class="grid"><div class="card"><h3>Top pages</h3>${tbl(st.top_pages,"path","Path")}</div><div class="card"><h3>Referrers</h3>${tbl(st.referrers,"source","Source")}</div><div class="card"><h3>Devices</h3>${tbl(st.devices,"device","Device")}</div></div>
+       <div class="card"><h3>Install tracking</h3><p class="mut">Paste inside &lt;head&gt; on every page of ${esc(TSITE)}. The site must be able to reach this server (${esc(origin)}).</p><pre>${esc(snippet)}</pre></div>`;
+    }
+    view.innerHTML=h;
+    on("#pin",async()=>{try{const r=await post("/api/traffic/pin",{site:$("#pinurl").value});TSITE=r.host;renderTraffic()}catch(e){alert(e.message)}});
+    on("#unpin",async()=>{if(confirm(`Unpin ${TSITE}? Collected data is kept.`)){await api(`/api/traffic/pin?site=${encodeURIComponent(TSITE)}`,{method:"DELETE"});renderTraffic()}});
+    document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{TSITE=b.dataset.pick;renderTraffic()});
+    const td=$("#tdays");if(td)td.onchange=()=>{TDAYS=+td.value;renderTraffic()};
+  }catch(e){view.innerHTML=`<div class="card bad">${esc(e.message)}</div>`}
+}
+
+function render(){
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));
+  if(tab==="Traffic")return renderTraffic();
+  if(NEEDS_CRAWL(tab)&&!R){$("#view").innerHTML='<p class="mut">Run an audit, or open a saved crawl from the <b>Crawls</b> tab.</p>';return}
+  $("#view").innerHTML=views[tab]();
+  if(GROUPS[tab]&&tab!=="Custom")afterGroup(tab);else if(afters[tab])afters[tab]();
+}
+/* reopen the most recent crawl on page load */
+(async()=>{try{const cs=await api("/api/crawls");if(cs.length){await openCrawl(cs[0].id)}}catch{}render()})();
+</script>
+</body>
+</html>
