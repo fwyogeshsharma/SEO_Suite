@@ -5,17 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SEO Suite</title>
 <style>
-:root{--bg:#0f1115;--card:#171a21;--line:#262b36;--tx:#e8eaf0;--mut:#8b93a7;--acc:#5b8cff;--ok:#34c38f;--warn:#f1b44c;--bad:#f46a6a}
+:root{--bg:#0b0d12;--card:#141821;--line:#232937;--tx:#e8eaf0;--mut:#8b93a7;--acc:#6c8dff;--acc2:#a78bfa;--ok:#34c38f;--warn:#f1b44c;--bad:#f46a6a;--side:232px}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,Segoe UI,sans-serif}
-header{padding:14px 24px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-h1{font-size:18px;margin:0 12px 0 0}input,textarea,select{background:#0c0e12;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:7px 10px;font:inherit}
+body{background:radial-gradient(1200px 500px at 70% -10%,#1a2140 0,transparent 60%),var(--bg);min-height:100vh}
+.app{display:flex;min-height:100vh}
+aside{width:var(--side);flex:none;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:#0e1118;border-right:1px solid var(--line)}
+.brand{padding:18px 18px 12px;font-size:18px;font-weight:700;letter-spacing:.2px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.content{flex:1;min-width:0}
+header{padding:14px 24px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#0e1118cc;backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
+h3{margin:0 0 10px;font-size:15px}input,textarea,select{background:#0c0e12;border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:7px 10px;font:inherit}
 textarea{width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;min-height:64px}
 input.url{flex:1;min-width:240px}button,.btn{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:7px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
 button.sec,.btn.sec{background:#222735;color:var(--tx)}button.sm{padding:3px 9px;font-size:12px}button:disabled{opacity:.5;cursor:wait}
-nav{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--line);overflow:auto;white-space:nowrap}
-nav button{background:none;color:var(--mut);border-radius:0;padding:11px 11px;border-bottom:2px solid transparent}
-nav button.on{color:var(--tx);border-color:var(--acc)}main{padding:20px 24px;max-width:1500px;margin:auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+nav{display:flex;flex-direction:column;gap:2px;padding:6px 10px 16px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#2a3142 transparent}
+nav::-webkit-scrollbar{width:6px}nav::-webkit-scrollbar-thumb{background:#2a3142;border-radius:3px}
+nav button{background:none;color:var(--mut);border-radius:8px;padding:8px 10px;text-align:left;display:flex;gap:10px;align-items:center;transition:.15s;border-left:3px solid transparent;flex:none}
+nav button svg{width:18px;height:18px;flex:none;stroke-width:1.8}nav button.on svg{color:var(--acc)}
+nav button:hover{background:#171c28;color:var(--tx)}
+nav button.on{color:#fff;background:linear-gradient(90deg,#6c8dff33,#6c8dff0d);border-left-color:var(--acc)}
+main{padding:22px 26px;max-width:1500px;margin:auto}
+@media(max-width:800px){.app{flex-direction:column}aside{width:auto;height:auto;position:static;flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:10px 14px}nav{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px;white-space:nowrap}nav button{border-left:0;border-bottom:2px solid transparent}nav button.on{border-bottom-color:var(--acc)}}
+.card{background:linear-gradient(180deg,#171c27,var(--card));border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 4px 18px #0004}
+.card.kpi{position:relative;overflow:hidden}.card.kpi:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--acc),var(--acc2))}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
 .big{font-size:38px;font-weight:700}.mut{color:var(--mut)}.pill{padding:2px 8px;border-radius:99px;font-size:12px}
 .critical{background:#f46a6a22;color:var(--bad)}.warning{background:#f1b44c22;color:var(--warn)}.info{background:#5b8cff22;color:var(--acc)}
@@ -35,12 +46,18 @@ pre{background:#0c0e12;border:1px solid var(--line);border-radius:8px;padding:12
 .hbar{display:flex;align-items:center;gap:8px}.hbar .b{height:14px;background:var(--acc);border-radius:3px}
 canvas{width:100%;background:#0c0e12;border:1px solid var(--line);border-radius:8px;display:block}
 .tree{font-size:13px;margin-left:14px}.tree summary{border:0;padding:1px 0}
+svg.chart{width:100%;height:auto;display:block}svg text{fill:var(--mut);font:11px system-ui}.legend{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-bottom:6px;flex-wrap:wrap}.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.split{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.split>div:last-child{flex:1;min-width:140px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.hbar .b{background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}.hbar{margin:3px 0}
+.btn:hover,button:hover{filter:brightness(1.1)}
 kbd{background:#222735;padding:1px 6px;border-radius:4px;font:12px ui-monospace,monospace}
 </style>
 </head>
 <body>
+<div class="app">
+<aside><div class="brand">◆ SEO Suite</div><nav id="tabs"></nav></aside>
+<div class="content">
 <header>
-  <h1>SEO Suite</h1>
   <input id="url" class="url" placeholder="https://yoursite.com">
   <input id="max" type="number" value="100" min="1" max="100000" style="width:90px" title="Crawl limit (max pages)">
   <button id="cfgbtn" class="sec">⚙ Crawl settings</button>
@@ -95,9 +112,10 @@ kbd{background:#222735;padding:1px 6px;border-radius:4px;font:12px ui-monospace,
     </div>
   </div>
 </section>
-<nav id="tabs"></nav>
 <main id="view"><p class="mut">Enter a URL and run an audit, or open a saved crawl from the <b>Crawls</b> tab.</p></main>
+</div></div>
 
+<script src="/static/lucide.min.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -130,8 +148,10 @@ const dl=(url,name)=>{const a=document.createElement("a");a.href=url;a.download=
 
 function refreshCaps(){api("/api/status").then(s=>$("#caps").textContent=`AI: ${s.ai?s.ai_info.provider:"off"} · GSC: ${s.gsc?"on":"off"} · GA4: ${s.ga?"on":"off"} · SMTP: ${s.smtp?"on":"off"}`)}
 refreshCaps();
-$("#tabs").innerHTML=TABS.map(t=>`<button data-t="${t}">${t}</button>`).join("");
-$("#tabs").onclick=e=>{if(e.target.dataset.t){tab=e.target.dataset.t;render()}};
+const ICONS={"Overview":"layout-dashboard","Issues":"triangle-alert","Pages":"file-text","Response & Links":"link","Titles & Meta":"tag","Images & Files":"image","Directives":"compass","Hreflang":"globe","Duplicates":"copy","Content":"pen-line","Structured Data":"blocks","Mobile & A11y":"smartphone","Security":"shield-check","Visualise":"network","Sitemaps":"map","Custom":"flask-conical","Integrations":"plug","Segments":"layers","Crawls":"history","Export":"download","AI SEO (GEO)":"bot","Keywords":"key-round","AI":"sparkles","AI Fixes":"wrench","Rank & Backlinks":"trending-up","Traffic":"chart-column","Settings":"settings"};
+$("#tabs").innerHTML=TABS.map(t=>`<button data-t="${t}"><i data-lucide="${ICONS[t]||"circle"}"></i><span>${t}</span></button>`).join("");
+window.lucide&&lucide.createIcons();
+$("#tabs").onclick=e=>{const b=e.target.closest("button");if(b){tab=b.dataset.t;render()}};
 $("#cfgbtn").onclick=()=>$("#settings").classList.toggle("hidden");
 
 function getConfig(){
@@ -207,19 +227,41 @@ function issueList(list){
    ${i.fix_hint?`<div style="margin:6px 0 0 16px">💡 ${esc(i.fix_hint)}</div>`:""}
    <div class="urls">${i.urls.map(esc).join("<br>")}${i.count>i.urls.length?`<br>… and ${i.count-i.urls.length} more — see Export`:""}</div></details>`).join("");
 }
-const hbars=(obj,color)=>{const m=Math.max(1,...Object.values(obj));return Object.entries(obj).map(([k,v])=>`<div class="hbar"><span style="width:110px" class="mut">${esc(k)}</span><div class="b" style="width:${200*v/m+2}px;${color?`background:${color}`:""}"></div><span>${v}</span></div>`).join("")||'<span class="mut">—</span>'};
+const hbars=(obj,color)=>{const m=Math.max(1,...Object.values(obj));return Object.entries(obj).map(([k,v])=>`<div class="hbar"><span style="width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" class="mut" title="${esc(k)}">${esc(k)}</span><div class="b" style="width:${Math.max(2,100*v/m*.55)}%;${color?`background:${color}`:""}"></div><span>${v}</span></div>`).join("")||'<span class="mut">—</span>'};
+
+/* ---------- charts (inline SVG) ---------- */
+const PAL=["#6c8dff","#a78bfa","#34c38f","#f1b44c","#f46a6a","#38bdf8","#f472b6"];
+function ring(v,label,color){const r=42,c=2*Math.PI*r,p=Math.max(0,Math.min(100,v))/100;
+  return `<svg class="chart" viewBox="0 0 110 110" style="max-width:120px"><circle cx="55" cy="55" r="${r}" fill="none" stroke="#232937" stroke-width="10"/><circle cx="55" cy="55" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c*p} ${c}" transform="rotate(-90 55 55)"/><text x="55" y="58" text-anchor="middle" style="font:700 26px system-ui;fill:#e8eaf0">${v}</text><text x="55" y="76" text-anchor="middle">${label}</text></svg>`}
+function donut(items,center){const tot=items.reduce((a,b)=>a+b.v,0);if(!tot)return '<span class="mut">No data yet.</span>';
+  const r=40,c=2*Math.PI*r;let off=0;
+  const arcs=items.map((it,i)=>{const len=c*it.v/tot,col=it.c||PAL[i%PAL.length],a=`<circle cx="55" cy="55" r="${r}" fill="none" stroke="${col}" stroke-width="16" stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-off}" transform="rotate(-90 55 55)"><title>${esc(it.k)}: ${it.v}</title></circle>`;off+=len;return a}).join("");
+  const lg=items.map((it,i)=>`<div><span class="dot" style="background:${it.c||PAL[i%PAL.length]}"></span>${esc(it.k)} <b>${it.v}</b> <span class="mut">${Math.round(100*it.v/tot)}%</span></div>`).join("");
+  return `<div class="split"><svg class="chart" viewBox="0 0 110 110" style="max-width:130px">${arcs}<text x="55" y="59" text-anchor="middle" style="font:700 17px system-ui;fill:#e8eaf0">${center??tot}</text></svg><div>${lg}</div></div>`}
+function lineChart(days,series){
+  const W=720,H=220,L=36,B=24,T=10,n=days.length,mx=Math.max(1,...series.flatMap(s=>days.map(s.f)));
+  const nice=(()=>{const p=10**Math.floor(Math.log10(mx));return Math.ceil(mx/p)*p})(),X=i=>L+(n<2?0:i*(W-L-8)/(n-1)),Y=v=>T+(H-T-B)*(1-v/nice);
+  const grid=[0,.25,.5,.75,1].map(f=>{const y=Y(nice*f);return `<line x1="${L}" x2="${W-8}" y1="${y}" y2="${y}" stroke="#232937"/><text x="${L-6}" y="${y+4}" text-anchor="end">${Math.round(nice*f)}</text>`}).join("");
+  const step=Math.max(1,Math.ceil(n/8)),xl=days.map((d,i)=>i%step===0?`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${d.day.slice(5)}</text>`:"").join("");
+  const paths=series.map((s,si)=>{const pts=days.map((d,i)=>`${X(i)},${Y(s.f(d))}`),line="M"+pts.join("L");
+    return (si===0?`<path d="${line}L${X(n-1)},${Y(0)}L${X(0)},${Y(0)}Z" fill="url(#g0)"/>`:"")+`<path d="${line}" fill="none" stroke="${s.c}" stroke-width="2.2" stroke-linejoin="round"/>`}).join("");
+  const hit=days.map((d,i)=>`<rect x="${X(i)-(W-L)/n/2}" y="${T}" width="${(W-L)/n}" height="${H-T-B}" fill="transparent"><title>${d.day}\n${series.map(s=>s.k+": "+s.f(d)).join("\n")}</title></rect>`).join("");
+  return `<div class="legend">${series.map(s=>`<span><b style="background:${s.c}"></b>${s.k}</span>`).join("")}</div><svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="g0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${series[0].c}" stop-opacity=".45"/><stop offset="1" stop-color="${series[0].c}" stop-opacity="0"/></linearGradient></defs>${grid}${xl}${paths}${hit}</svg>`}
 
 /* ---------- views ---------- */
 const views={
 Overview(){
   const s=R.score.overall,g=R.geo.score,sv=x=>R.issues.filter(i=>i.severity===x).length;
   return `<div class="grid">
-   <div class="card"><div class="mut">Technical SEO score</div><div class="big ${col(s)}">${s}</div></div>
-   <div class="card"><div class="mut">AI SEO / GEO score</div><div class="big ${col(g)}">${g}</div></div>
-   <div class="card"><div class="mut">Pages crawled</div><div class="big">${R.pages_crawled}</div><div class="mut">${R.duration_s??""}s ${R.js_rendered?"· JS rendered":""}</div></div>
-   <div class="card"><div class="mut">Critical / Warnings / Info</div><div class="big"><span class="bad">${sv("critical")}</span> / <span style="color:var(--warn)">${sv("warning")}</span> / <span style="color:var(--acc)">${sv("info")}</span></div></div></div>
+   <div class="card kpi"><div class="mut">Technical SEO score</div>${ring(s,"/ 100",s>=80?"#34c38f":s>=50?"#f1b44c":"#f46a6a")}</div>
+   <div class="card kpi"><div class="mut">AI SEO / GEO score</div>${ring(g,"/ 100",g>=80?"#34c38f":g>=50?"#f1b44c":"#f46a6a")}</div>
+   <div class="card kpi"><div class="mut">Pages crawled</div><div class="big">${R.pages_crawled}</div><div class="mut">${R.duration_s??""}s ${R.js_rendered?"· JS rendered":""}</div></div>
+   <div class="card kpi"><div class="mut">Critical / Warnings / Info</div><div class="big"><span class="bad">${sv("critical")}</span> / <span style="color:var(--warn)">${sv("warning")}</span> / <span style="color:var(--acc)">${sv("info")}</span></div></div></div>
+   <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))"><div class="card"><h3>Issues by severity</h3>${donut([{k:"Critical",v:sv("critical"),c:"#f46a6a"},{k:"Warning",v:sv("warning"),c:"#f1b44c"},{k:"Info",v:sv("info"),c:"#6c8dff"}].filter(x=>x.v))}</div>
+   <div class="card"><h3>Indexability</h3>${donut(Object.entries(R.indexability||{}).map(([k,v])=>({k,v})))}</div>
+   <div class="card"><h3>Status codes</h3>${donut(Object.entries(R.status_codes||{}).map(([k,v])=>({k:String(k),v,c:/^2/.test(k)?"#34c38f":/^3/.test(k)?"#f1b44c":/^[45]/.test(k)?"#f46a6a":undefined})))}</div></div>
    <div class="grid"><div class="card"><h3>Score by category</h3>${hbars(R.score.by_category)}</div>
-   <div class="card"><h3>Indexability</h3>${hbars(R.indexability||{},"var(--ok)")}<h3>Status codes</h3>${hbars(R.status_codes||{},"var(--warn)")}</div>
+   <div class="card"><h3>Issues by category</h3>${hbars(R.issues.reduce((o,i)=>(o[i.category]=(o[i.category]||0)+i.count,o),{}),"var(--warn)")}</div>
    <div class="card"><h3>Click depth</h3>${hbars(Object.fromEntries(Object.entries(R.depth||{}).map(([k,v])=>["depth "+k,v])))}</div></div>
    <div class="card"><h3>Action plan</h3><button id="plan">Generate prioritized plan</button> <a class="btn sec" target="_blank" href="/api/crawl/${CID}/report.html">Open printable report</a><pre id="planout" class="hidden"></pre></div>
    <div class="card"><h3>Top issues</h3>${issueList(R.issues.filter(i=>i.severity==="critical").slice(0,8))}</div>`;
@@ -436,12 +478,12 @@ async function renderTraffic(){
     if(TSITE){
       const st=await api(`/api/traffic/stats?site=${encodeURIComponent(TSITE)}&days=${TDAYS}`);
       const origin=location.origin,snippet=`<script defer src="${origin}/t.js" data-site="${TSITE}"><\/script>`;
-      const max=Math.max(1,...st.daily.map(d=>d.views));
-      const tbl=(rows,k,label)=>rows.length?`<table><tr><th>${label}</th><th>Views</th></tr>${rows.map(r=>`<tr><td>${esc(r[k])}</td><td>${r.views}</td></tr>`).join("")}</table>`:`<p class="mut">No data yet.</p>`;
+            const tbl=(rows,k,label)=>rows.length?`<table><tr><th>${label}</th><th>Views</th></tr>${rows.map(r=>`<tr><td>${esc(r[k])}</td><td>${r.views}</td></tr>`).join("")}</table>`:`<p class="mut">No data yet.</p>`;
       h+=`<div class="card"><div class="row"><b>${esc(TSITE)}</b><select id="tdays">${[7,30,90].map(d=>`<option value="${d}" ${d===TDAYS?"selected":""}>Last ${d} days</option>`).join("")}</select><button id="unpin" class="sec">Unpin</button></div></div>
        <div class="grid"><div class="card"><div class="mut">Page views</div><div class="big">${st.views}</div></div><div class="card"><div class="mut">Visitors (sum of daily uniques)</div><div class="big">${st.visitors}</div></div><div class="card"><div class="mut">Active now (5 min)</div><div class="big ok">${st.live_now}</div></div></div>
-       <div class="card"><h3>Views per day</h3><div style="display:flex;align-items:flex-end;gap:2px;height:110px">${st.daily.map(d=>`<div title="${d.day}: ${d.views} views, ${d.visitors} visitors" style="flex:1;background:var(--acc);min-height:2px;height:${Math.max(2,100*d.views/max)}%;opacity:${d.views?1:.25}"></div>`).join("")}</div></div>
-       <div class="grid"><div class="card"><h3>Top pages</h3>${tbl(st.top_pages,"path","Path")}</div><div class="card"><h3>Referrers</h3>${tbl(st.referrers,"source","Source")}</div><div class="card"><h3>Devices</h3>${tbl(st.devices,"device","Device")}</div></div>
+       <div class="card"><h3>Traffic over time</h3>${lineChart(st.daily,[{k:"Page views",c:"#6c8dff",f:d=>d.views},{k:"Visitors",c:"#34c38f",f:d=>d.visitors}])}</div>
+       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))"><div class="card"><h3>Devices</h3>${donut(st.devices.map(d=>({k:d.device||"unknown",v:d.views})),st.views)}</div><div class="card"><h3>Top referrers</h3>${hbars(Object.fromEntries(st.referrers.slice(0,8).map(r=>[r.source,r.views])),"var(--acc2)")}</div><div class="card"><h3>Top pages</h3>${hbars(Object.fromEntries(st.top_pages.slice(0,8).map(r=>[r.path,r.views])))}</div></div>
+       <div class="grid"><div class="card"><h3>All top pages</h3>${tbl(st.top_pages,"path","Path")}</div><div class="card"><h3>All referrers</h3>${tbl(st.referrers,"source","Source")}</div></div>
        <div class="card"><h3>Install tracking</h3><p class="mut">Paste inside &lt;head&gt; on every page of ${esc(TSITE)}. The site must be able to reach this server (${esc(origin)}).</p><pre>${esc(snippet)}</pre></div>`;
     }
     view.innerHTML=h;
@@ -454,6 +496,7 @@ async function renderTraffic(){
 
 function render(){
   document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));
+  document.querySelector("#tabs button.on")?.scrollIntoView({block:"nearest"});
   if(tab==="Traffic")return renderTraffic();
   if(NEEDS_CRAWL(tab)&&!R){$("#view").innerHTML='<p class="mut">Run an audit, or open a saved crawl from the <b>Crawls</b> tab.</p>';return}
   $("#view").innerHTML=views[tab]();
